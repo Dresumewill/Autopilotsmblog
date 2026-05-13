@@ -5,18 +5,11 @@ import { prisma } from "@/lib/prisma";
 // Records an affiliate link click and returns the destination URL
 
 export async function POST(request: NextRequest) {
-  let body: { linkId?: string };
-
-  try {
-    body = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
-  }
-
-  const { linkId } = body;
+  const { searchParams } = new URL(request.url);
+  const linkId = searchParams.get("id");
 
   if (!linkId) {
-    return NextResponse.json({ error: "linkId is required" }, { status: 400 });
+    return NextResponse.json({ error: "id is required" }, { status: 400 });
   }
 
   try {

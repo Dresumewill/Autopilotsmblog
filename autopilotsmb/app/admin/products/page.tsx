@@ -20,7 +20,7 @@ import {
 
 interface Product {
   id: string;
-  title: string;
+  name: string;
   description: string;
   type: "EBOOK" | "TEMPLATE" | "COURSE" | "TOOLKIT";
   price: number;
@@ -64,7 +64,7 @@ function ProductModal({
   const [error, setError] = useState<string | null>(null);
 
   const [form, setForm] = useState({
-    title: product?.title ?? "",
+    name: product?.name ?? "",
     description: product?.description ?? "",
     type: product?.type ?? "EBOOK",
     price: product?.price ? (product.price / 100).toFixed(2) : "0.00",
@@ -83,6 +83,7 @@ function ProductModal({
 
     const body = {
       ...form,
+      name: form.name,
       price: Math.round(parseFloat(form.price) * 100),
     };
 
@@ -126,12 +127,12 @@ function ProductModal({
           )}
 
           <div>
-            <label className="block text-sm font-medium text-zinc-300 mb-1">Title *</label>
+            <label className="block text-sm font-medium text-zinc-300 mb-1">Name *</label>
             <input
               type="text"
               required
-              value={form.title}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
+              value={form.name}
+              onChange={(e) => setForm({ ...form, name: e.target.value })}
               className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500"
             />
           </div>
@@ -279,7 +280,7 @@ export default function AdminProductsPage() {
   }, [fetchProducts]);
 
   async function deleteProduct(product: Product) {
-    if (!confirm(`Delete "${product.title}"?`)) return;
+    if (!confirm(`Delete "${product.name}"?`)) return;
     setDeletingId(product.id);
     try {
       const res = await fetch(`/api/products/${product.id}`, { method: "DELETE" });
@@ -303,7 +304,7 @@ export default function AdminProductsPage() {
         />
       )}
 
-      <div className="space-y-6">
+      <div className="p-6 max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -368,7 +369,7 @@ export default function AdminProductsPage() {
                   </div>
 
                   <h3 className="text-white font-semibold text-sm mb-1 line-clamp-2">
-                    {product.title}
+                    {product.name}
                   </h3>
                   <p className="text-zinc-500 text-xs line-clamp-2 mb-4">
                     {product.description}

@@ -3,7 +3,6 @@
 "use client";
 
 import { useState } from "react";
-import { buildMetadata } from "@/lib/seo";
 import { Mail, MessageSquare, DollarSign, Wrench, Send, Check } from "lucide-react";
 
 const contactReasons = [

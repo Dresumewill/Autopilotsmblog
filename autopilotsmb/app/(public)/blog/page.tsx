@@ -170,7 +170,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                 <div className="flex items-center justify-center gap-2 mt-12">
                   {page > 1 && (
                     <Link
-                      href={`/blog?page=${page - 1}${activeCategory ? `&category=${activeCategory}` : ""}`}
+                      href={`/blog?page=${page - 1}${activeCategory ? `&category=${activeCategory}` : ""}${activeTag ? `&tag=${activeTag}` : ""}`}
                       className="btn-secondary text-sm py-2 px-4"
                     >
                       ← Previous
@@ -181,7 +181,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                   </span>
                   {page < totalPages && (
                     <Link
-                      href={`/blog?page=${page + 1}${activeCategory ? `&category=${activeCategory}` : ""}`}
+                      href={`/blog?page=${page + 1}${activeCategory ? `&category=${activeCategory}` : ""}${activeTag ? `&tag=${activeTag}` : ""}`}
                       className="btn-primary text-sm py-2 px-4"
                     >
                       Next →

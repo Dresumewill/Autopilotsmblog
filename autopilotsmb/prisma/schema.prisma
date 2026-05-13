@@ -107,6 +107,8 @@ model Post {
   // Relations
   authorId   String
   author     User       @relation(fields: [authorId], references: [id])
+  categoryId String?
+  category   Category?  @relation("PostCategory", fields: [categoryId], references: [id])
   categories Category[] @relation("PostCategories")
   tags       Tag[]      @relation("PostTags")
 
@@ -125,8 +127,9 @@ model Category {
   icon        String? // Lucide icon name
   createdAt   DateTime @default(now())
 
-  posts Post[] @relation("PostCategories")
-  tools Tool[]
+  posts      Post[] @relation("PostCategories")
+  mainPosts  Post[] @relation("PostCategory")
+  tools      Tool[]
 
   @@index([slug])
   @@map("categories")
@@ -222,6 +225,7 @@ model Product {
   fileUrl     String?       // for digital downloads
   coverImage  String?
   published   Boolean       @default(false)
+  featured    Boolean       @default(false)
   stripePriceId String?     // Stripe Price ID
   stripeProductId String?   // Stripe Product ID
   createdAt   DateTime      @default(now())
@@ -241,14 +245,15 @@ enum ProductType {
 }
 
 model Order {
-  id              String      @id @default(cuid())
-  stripeSessionId String      @unique
-  customerEmail   String
-  amount          Int         // in cents
-  currency        String      @default("usd")
-  status          OrderStatus @default(PENDING)
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  id                    String      @id @default(cuid())
+  stripeSessionId       String      @unique
+  stripePaymentIntentId String?
+  customerEmail         String
+  amount                Int         // in cents
+  currency              String      @default("usd")
+  status                OrderStatus @default(PENDING)
+  createdAt             DateTime    @default(now())
+  updatedAt             DateTime    @updatedAt
 
   productId String
   product   Product @relation(fields: [productId], references: [id])
@@ -271,6 +276,7 @@ model NewsletterSubscriber {
   firstName   String?
   source      String?  // where they signed up from
   confirmed   Boolean  @default(false)
+  active      Boolean  @default(true)
   createdAt   DateTime @default(now())
 
   @@index([email])

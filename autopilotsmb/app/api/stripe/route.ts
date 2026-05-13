@@ -108,6 +108,6 @@ async function handleSuccessfulPayment(session: Stripe.Checkout.Session) {
   // await sendPurchaseEmail(metadata.customerEmail, product);
 
   console.log(
-    `[Stripe] Order created for ${metadata.customerEmail} — product: ${product.title}`
+    `[Stripe] Order created for ${metadata.customerEmail} — product: ${product.name}`
   );
 }

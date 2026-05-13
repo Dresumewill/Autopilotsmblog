@@ -19,7 +19,7 @@ export const metadata = buildMetadata({
 
 // ── Data fetching ──────────────────────────────────────────────────────────────
 async function getHomeData() {
-  const [featuredPosts, featuredTools, categories] = await Promise.all([
+  const [featuredPosts, featuredTools] = await Promise.all([
     prisma.post.findMany({
       where: { published: true },
       orderBy: { publishedAt: "desc" },
@@ -36,14 +36,9 @@ async function getHomeData() {
       take: 6,
       include: { category: { select: { name: true } } },
     }),
-    prisma.category.findMany({
-      include: { _count: { select: { posts: true } } },
-      orderBy: { posts: { _count: "desc" } },
-      take: 6,
-    }),
   ]);
 
-  return { featuredPosts, featuredTools, categories };
+  return { featuredPosts, featuredTools };
 }
 
 // ── Testimonials (static for now — move to DB if needed) ──────────────────────

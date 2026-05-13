@@ -89,8 +89,8 @@ export default async function ResourcesPage() {
   const dbProducts = await getProducts();
   const products = dbProducts.length > 0 ? dbProducts : staticProducts;
 
-  const freeProducts = staticProducts.filter((p) => p.free || p.price === 0);
-  const paidProducts = staticProducts.filter((p) => !p.free && p.price > 0);
+  const freeProducts = products.filter((p) => (p as any).free || p.price === 0);
+  const paidProducts = products.filter((p) => !(p as any).free && p.price > 0);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

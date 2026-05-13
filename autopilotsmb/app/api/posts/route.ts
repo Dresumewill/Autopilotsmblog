@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
   }
 
   if (category) {
-    where.category = { slug: category };
+    where.categories = { some: { slug: category } };
   }
 
   if (tag) {

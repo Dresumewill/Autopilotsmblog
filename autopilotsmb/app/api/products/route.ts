@@ -4,7 +4,7 @@ import { requireAdmin } from "@/lib/auth";
 import { z } from "zod";
 
 const ProductSchema = z.object({
-  title: z.string().min(1).max(200),
+  name: z.string().min(1).max(200),
   description: z.string().max(2000).optional().default(""),
   type: z.enum(["EBOOK", "TEMPLATE", "COURSE", "TOOLKIT"]),
   price: z.number().int().min(0),
@@ -40,7 +40,11 @@ export async function POST(request: NextRequest) {
   if (!parsed.success) return NextResponse.json({ error: "Validation failed", issues: parsed.error.issues }, { status: 422 });
 
   try {
-    const product = await prisma.product.create({ data: parsed.data });
+    const slug = parsed.data.name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
+    const product = await prisma.product.create({ data: { ...parsed.data, slug } });
     return NextResponse.json({ product }, { status: 201 });
   } catch (error) {
     console.error("[POST /api/products]", error);

@@ -177,6 +177,7 @@ async function main() {
       create: {
         name: "Claude",
         slug: "claude-ai",
+        tagline: "AI assistant for writing, analysis, and coding",
         description:
           "Anthropic's AI assistant — best for writing, analysis, strategy, and coding. The top choice for small business owners.",
         website: "https://claude.ai",
@@ -202,6 +203,7 @@ async function main() {
       create: {
         name: "Make",
         slug: "make-automation",
+        tagline: "Visual automation platform connecting 1,500+ apps",
         description:
           "The most powerful visual automation platform for growing businesses. Connect 1,500+ apps without code.",
         website: "https://make.com",
@@ -227,6 +229,7 @@ async function main() {
       create: {
         name: "Surfer SEO",
         slug: "surfer-seo",
+        tagline: "Data-driven SEO content optimization for Google rankings",
         description:
           "Data-driven content optimization tool that helps small businesses create content that ranks on Google.",
         website: "https://surferseo.com",
@@ -250,7 +253,8 @@ async function main() {
       update: {},
       create: {
         id: "product-automation-kit",
-        title: "Small Business AI Automation Toolkit",
+        slug: "ai-automation-toolkit",
+        name: "Small Business AI Automation Toolkit",
         description:
           "15 ready-to-import Make.com scenario templates for the most common small business workflows. Save 20+ hours setting up automation.",
         type: "TOOLKIT",
@@ -265,7 +269,8 @@ async function main() {
       update: {},
       create: {
         id: "product-content-playbook",
-        title: "AI Content Marketing Playbook",
+        slug: "ai-content-marketing-playbook",
+        name: "AI Content Marketing Playbook",
         description:
           "The complete system for producing 30 pieces of content per month with AI tools. Includes templates, prompts, and a 90-day calendar.",
         type: "EBOOK",
@@ -280,7 +285,8 @@ async function main() {
       update: {},
       create: {
         id: "product-sop-templates",
-        title: "AI SOP Template Pack (25 Templates)",
+        slug: "ai-sop-template-pack",
+        name: "AI SOP Template Pack (25 Templates)",
         description:
           "25 ready-to-customize Standard Operating Procedure templates for common small business processes. Built for use with Claude and Notion.",
         type: "TEMPLATE",

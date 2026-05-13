@@ -25,10 +25,14 @@ async function getDashboardStats() {
     prisma.post.findMany({
       orderBy: { createdAt: "desc" },
       take: 5,
-      include: { author: { select: { name: true } } },
       select: {
-        id: true, title: true, slug: true, published: true,
-        createdAt: true, views: true, author: true,
+        id: true,
+        title: true,
+        slug: true,
+        published: true,
+        createdAt: true,
+        views: true,
+        author: { select: { name: true } },
       },
     }),
     prisma.post.findMany({

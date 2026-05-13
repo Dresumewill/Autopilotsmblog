@@ -4,7 +4,7 @@ import { requireAdmin } from "@/lib/auth";
 import { z } from "zod";
 
 const ProductUpdateSchema = z.object({
-  title: z.string().min(1).max(200).optional(),
+  name: z.string().min(1).max(200).optional(),
   description: z.string().max(2000).optional(),
   type: z.enum(["EBOOK", "TEMPLATE", "COURSE", "TOOLKIT"]).optional(),
   price: z.number().int().min(0).optional(),
