@@ -1,0 +1,278 @@
+// prisma/schema.prisma
+// AutoPilotSMB — Full database schema
+// PostgreSQL + Prisma ORM
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────
+// AUTH
+// ─────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?   // hashed — for credential login
+  role          UserRole  @default(EDITOR)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  posts         Post[]
+
+  @@index([email])
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+enum UserRole {
+  ADMIN
+  EDITOR
+}
+
+// ─────────────────────────────────────────
+// BLOG
+// ─────────────────────────────────────────
+
+model Post {
+  id          String     @id @default(cuid())
+  slug        String     @unique
+  title       String
+  excerpt     String     @db.Text
+  content     String     @db.Text  // MDX content
+  coverImage  String?
+  published   Boolean    @default(false)
+  featured    Boolean    @default(false)
+  readingTime Int?       // minutes
+  views       Int        @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  publishedAt DateTime?
+
+  // SEO fields
+  metaTitle       String?
+  metaDescription String?
+  canonicalUrl    String?
+  ogImage         String?
+
+  // Relations
+  authorId   String
+  author     User       @relation(fields: [authorId], references: [id])
+  categories Category[] @relation("PostCategories")
+  tags       Tag[]      @relation("PostTags")
+
+  @@index([slug])
+  @@index([published, publishedAt])
+  @@index([featured])
+  @@map("posts")
+}
+
+model Category {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  slug        String  @unique
+  description String?
+  color       String? // hex color for UI
+  icon        String? // Lucide icon name
+  createdAt   DateTime @default(now())
+
+  posts Post[] @relation("PostCategories")
+  tools Tool[]
+
+  @@index([slug])
+  @@map("categories")
+}
+
+model Tag {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
+  createdAt DateTime @default(now())
+
+  posts Post[] @relation("PostTags")
+
+  @@index([slug])
+  @@map("tags")
+}
+
+// ─────────────────────────────────────────
+// AI TOOL DIRECTORY
+// ─────────────────────────────────────────
+
+model Tool {
+  id          String      @id @default(cuid())
+  slug        String      @unique
+  name        String
+  tagline     String
+  description String      @db.Text
+  website     String
+  logoUrl     String?
+  coverImage  String?
+  pricing     ToolPricing
+  priceLabel    String?
+  priceFrom     Float?
+  pricePro      Float?
+  categoryLabel String?
+  rating      Float?      @default(0)
+  reviewCount Int         @default(0)
+  featured    Boolean     @default(false)
+  published   Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+
+  // Relations
+  categoryId    String?
+  category      Category?      @relation(fields: [categoryId], references: [id])
+  affiliateLinks AffiliateLink[]
+
+  @@index([slug])
+  @@index([featured])
+  @@index([pricing])
+  @@map("tools")
+}
+
+enum ToolPricing {
+  FREE
+  FREEMIUM
+  PAID
+  TRIAL
+}
+
+// ─────────────────────────────────────────
+// MONETIZATION
+// ─────────────────────────────────────────
+
+model AffiliateLink {
+  id          String   @id @default(cuid())
+  name        String
+  url         String   // the tracking URL
+  displayUrl  String?  // the clean display URL
+  commission  String?  // e.g. "30% recurring"
+  clicks      Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  toolId String?
+  tool   Tool?   @relation(fields: [toolId], references: [id])
+
+  @@map("affiliate_links")
+}
+
+model Product {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  name        String
+  description String        @db.Text
+  price       Int           // in cents (Stripe standard)
+  currency    String        @default("usd")
+  type        ProductType
+  fileUrl     String?       // for digital downloads
+  coverImage  String?
+  published   Boolean       @default(false)
+  stripePriceId String?     // Stripe Price ID
+  stripeProductId String?   // Stripe Product ID
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  orders Order[]
+
+  @@index([slug])
+  @@map("products")
+}
+
+enum ProductType {
+  EBOOK
+  TEMPLATE
+  COURSE
+  TOOLKIT
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  stripeSessionId String      @unique
+  customerEmail   String
+  amount          Int         // in cents
+  currency        String      @default("usd")
+  status          OrderStatus @default(PENDING)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@index([customerEmail])
+  @@index([status])
+  @@map("orders")
+}
+
+enum OrderStatus {
+  PENDING
+  COMPLETED
+  REFUNDED
+  FAILED
+}
+
+model NewsletterSubscriber {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  firstName   String?
+  source      String?  // where they signed up from
+  confirmed   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@index([email])
+  @@map("newsletter_subscribers")
+}
