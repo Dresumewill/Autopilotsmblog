@@ -3,12 +3,12 @@
 // Full tool catalog with category filters, pricing labels, affiliate buttons
 
 import Link from "next/link";
-import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { buildMetadata, softwareApplicationSchema } from "@/lib/seo";
 import AdSlot from "@/components/AdSlot";
 import { NewsletterCTA } from "@/components/CTA";
-import { Star, ExternalLink, Search, Zap, Filter } from "lucide-react";
+import ToolCard from "@/components/ToolCard";
+import { Search, Filter } from "lucide-react";
 
 export const metadata = buildMetadata({
   title: "Best AI Tools for Small Business — Directory",
@@ -181,7 +181,7 @@ export default async function ToolsPage({ searchParams }: ToolsPageProps) {
                 </h3>
                 <div className="space-y-1">
                   <Link
-                    href="/tools"
+                    href={`/tools${activePricing ? `?pricing=${activePricing}` : ""}${params.sort ? `${activePricing ? "&" : "?"}sort=${params.sort}` : ""}`}
                     className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
                       !activeCategory
                         ? "bg-blue-electric/15 text-blue-electric"
@@ -192,22 +192,25 @@ export default async function ToolsPage({ searchParams }: ToolsPageProps) {
                     <span className="text-xs text-zinc-600">{displayTools.length}</span>
                   </Link>
                   {categories.length > 0
-                    ? categories.map((cat: any) => (
-                        <Link
-                          key={cat.id}
-                          href={`/tools?category=${cat.slug}`}
-                          className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
-                            activeCategory === cat.slug
-                              ? "bg-blue-electric/15 text-blue-electric"
-                              : "text-zinc-400 hover:text-white hover:bg-white/5"
-                          }`}
-                        >
-                          {cat.name}
-                          <span className="text-xs text-zinc-600">
-                            {cat._count.tools}
-                          </span>
-                        </Link>
-                      ))
+                    ? categories.map((cat: any) => {
+                        const q = new URLSearchParams({ category: cat.slug });
+                        if (activePricing) q.set("pricing", activePricing);
+                        if (params.sort) q.set("sort", params.sort);
+                        return (
+                          <Link
+                            key={cat.id}
+                            href={`/tools?${q.toString()}`}
+                            className={`flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors ${
+                              activeCategory === cat.slug
+                                ? "bg-blue-electric/15 text-blue-electric"
+                                : "text-zinc-400 hover:text-white hover:bg-white/5"
+                            }`}
+                          >
+                            {cat.name}
+                            <span className="text-xs text-zinc-600">{cat._count.tools}</span>
+                          </Link>
+                        );
+                      })
                     : ["AI Writing", "Automation", "SEO Tools", "Productivity", "AI Images"].map(
                         (cat) => (
                           <Link
@@ -226,19 +229,25 @@ export default async function ToolsPage({ searchParams }: ToolsPageProps) {
               <div className="card p-4">
                 <h3 className="text-sm font-semibold text-white mb-3">Pricing</h3>
                 <div className="space-y-1">
-                  {pricingOptions.map((opt) => (
-                    <Link
-                      key={opt.value}
-                      href={`/tools${opt.value ? `?pricing=${opt.value}` : ""}`}
-                      className={`flex px-3 py-2 rounded-lg text-sm transition-colors ${
-                        (activePricing || "") === opt.value
-                          ? "bg-blue-electric/15 text-blue-electric"
-                          : "text-zinc-400 hover:text-white hover:bg-white/5"
-                      }`}
-                    >
-                      {opt.label}
-                    </Link>
-                  ))}
+                  {pricingOptions.map((opt) => {
+                    const q = new URLSearchParams();
+                    if (opt.value) q.set("pricing", opt.value);
+                    if (activeCategory) q.set("category", activeCategory);
+                    if (params.sort) q.set("sort", params.sort);
+                    return (
+                      <Link
+                        key={opt.value}
+                        href={`/tools${q.toString() ? `?${q.toString()}` : ""}`}
+                        className={`flex px-3 py-2 rounded-lg text-sm transition-colors ${
+                          (activePricing || "") === opt.value
+                            ? "bg-blue-electric/15 text-blue-electric"
+                            : "text-zinc-400 hover:text-white hover:bg-white/5"
+                        }`}
+                      >
+                        {opt.label}
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -256,33 +265,43 @@ export default async function ToolsPage({ searchParams }: ToolsPageProps) {
               </p>
               <div className="flex items-center gap-2">
                 <span className="text-xs text-zinc-600">Sort:</span>
-                {["featured", "rating", "name"].map((s) => (
-                  <Link
-                    key={s}
-                    href={`/tools?sort=${s}${activeCategory ? `&category=${activeCategory}` : ""}`}
-                    className={`text-xs px-2.5 py-1 rounded-lg border transition-colors capitalize ${
-                      (params.sort || "featured") === s
-                        ? "bg-zinc-800 border-zinc-700 text-white"
-                        : "border-zinc-800 text-zinc-500 hover:text-white"
-                    }`}
-                  >
-                    {s}
-                  </Link>
-                ))}
+                {["featured", "rating", "name"].map((s) => {
+                  const q = new URLSearchParams({ sort: s });
+                  if (activeCategory) q.set("category", activeCategory);
+                  if (activePricing) q.set("pricing", activePricing);
+                  return (
+                    <Link
+                      key={s}
+                      href={`/tools?${q.toString()}`}
+                      className={`text-xs px-2.5 py-1 rounded-lg border transition-colors capitalize ${
+                        (params.sort || "featured") === s
+                          ? "bg-zinc-800 border-zinc-700 text-white"
+                          : "border-zinc-800 text-zinc-500 hover:text-white"
+                      }`}
+                    >
+                      {s}
+                    </Link>
+                  );
+                })}
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {displayTools.map((tool: any, idx: number) => (
-                <div key={tool.slug || tool.name}>
-                  <ToolCard tool={tool} />
-                  {(idx + 1) % 8 === 0 && (
-                    <div className="sm:col-span-2 mt-4">
+              {displayTools.flatMap((tool: any, idx: number) => {
+                const items = [
+                  <div key={tool.slug || tool.name}>
+                    <ToolCard tool={tool} />
+                  </div>,
+                ];
+                if ((idx + 1) % 8 === 0) {
+                  items.push(
+                    <div key={`ad-${idx}`} className="sm:col-span-2 mt-4">
                       <AdSlot slot={`tools-inline-${idx}`} format="horizontal" />
                     </div>
-                  )}
-                </div>
-              ))}
+                  );
+                }
+                return items;
+              })}
             </div>
           </div>
         </div>
@@ -298,108 +317,3 @@ export default async function ToolsPage({ searchParams }: ToolsPageProps) {
   );
 }
 
-// ── Tool Card Component ────────────────────────────────────────────────────────
-function ToolCard({ tool }: { tool: any }) {
-  const pricingConfig: Record<string, { label: string; class: string }> = {
-    FREE: { label: "Free", class: "badge-green" },
-    FREEMIUM: { label: "Freemium", class: "badge-blue" },
-    PAID: { label: "Paid", class: "badge-orange" },
-    TRIAL: { label: "Free Trial", class: "badge-blue" },
-  };
-
-  const pricing = pricingConfig[tool.pricing] || { label: tool.pricing, class: "badge-blue" };
-
-  return (
-    <div className="card card-glow p-5 h-full flex flex-col">
-      <div className="flex items-start justify-between gap-3 mb-3">
-        <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center flex-shrink-0 overflow-hidden">
-            {tool.logoUrl ? (
-              <Image
-                src={tool.logoUrl}
-                alt={tool.name}
-                width={44}
-                height={44}
-                className="object-contain p-1"
-              />
-            ) : (
-              <Zap className="w-5 h-5 text-blue-electric" />
-            )}
-          </div>
-          <div>
-            <h3 className="font-bold text-white font-display leading-tight">{tool.name}</h3>
-            {tool.category && (
-              <span className="text-xs text-zinc-500">
-                {tool.category?.name || tool.category}
-              </span>
-            )}
-          </div>
-        </div>
-        <span className={`badge ${pricing.class} flex-shrink-0`}>{pricing.label}</span>
-      </div>
-
-      <p className="text-sm text-zinc-400 leading-relaxed mb-4 flex-1">
-        {tool.tagline}
-      </p>
-
-      {/* Rating */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-1.5">
-          <div className="flex items-center gap-0.5">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Star
-                key={i}
-                className={`w-3.5 h-3.5 ${
-                  i < Math.round(tool.rating || 0)
-                    ? "text-yellow-400 fill-yellow-400"
-                    : "text-zinc-700"
-                }`}
-              />
-            ))}
-          </div>
-          <span className="text-sm font-semibold text-white">
-            {(tool.rating || 0).toFixed(1)}
-          </span>
-          {tool.reviewCount > 0 && (
-            <span className="text-xs text-zinc-600">
-              ({tool.reviewCount.toLocaleString()})
-            </span>
-          )}
-        </div>
-        {tool.priceLabel && (
-          <span className="text-xs text-zinc-500 font-mono">{tool.priceLabel}</span>
-        )}
-      </div>
-
-      {/* Actions */}
-      <div className="flex items-center gap-2">
-        <a
-          href={
-            tool.affiliateLinks?.[0]?.url ||
-            tool.website ||
-            "#"
-          }
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex-1 btn-primary text-sm py-2 justify-center"
-          onClick={() => {
-            if (tool.affiliateLinks?.[0]?.id) {
-              fetch(`/api/affiliate/track?id=${tool.affiliateLinks[0].id}`, { method: "POST" }).catch(() => {});
-            }
-          }}
-        >
-          Try Free
-          <ExternalLink className="w-3.5 h-3.5" />
-        </a>
-        {tool.slug && (
-          <Link
-            href={`/tools/${tool.slug}`}
-            className="btn-secondary text-sm py-2 px-3"
-          >
-            Review
-          </Link>
-        )}
-      </div>
-    </div>
-  );
-}

@@ -108,7 +108,7 @@ export default function AffiliateBox({
                     <Star
                       key={i}
                       className={`w-3 h-3 ${
-                        i < Math.round(rating)
+                        i < Math.floor(rating)
                           ? "text-yellow-400 fill-yellow-400"
                           : "text-zinc-700"
                       }`}

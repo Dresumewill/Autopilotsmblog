@@ -1,7 +1,6 @@
 // app/(public)/blog/page.tsx
 // Blog listing with category/tag filtering, pagination, sidebar
 
-import { Suspense } from "react";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { buildMetadata } from "@/lib/seo";
@@ -152,17 +151,21 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
           {posts.length > 0 ? (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-                {posts.map((post, idx) => (
-                  <div key={post.id}>
-                    <PostCard post={post} />
-                    {/* Inline ad every 6 posts */}
-                    {(idx + 1) % 6 === 0 && idx < posts.length - 1 && (
-                      <div className="sm:col-span-2 xl:col-span-3 my-4">
+                {posts.flatMap((post, idx) => {
+                  const items = [
+                    <div key={post.id}>
+                      <PostCard post={post} />
+                    </div>,
+                  ];
+                  if ((idx + 1) % 6 === 0 && idx < posts.length - 1) {
+                    items.push(
+                      <div key={`ad-${idx}`} className="sm:col-span-2 xl:col-span-3 my-4">
                         <AdSlot slot={`inline-${idx}`} format="horizontal" />
                       </div>
-                    )}
-                  </div>
-                ))}
+                    );
+                  }
+                  return items;
+                })}
               </div>
 
               {/* Pagination */}

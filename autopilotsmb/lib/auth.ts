@@ -5,6 +5,7 @@
 import NextAuth from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import Credentials from "next-auth/providers/credentials";
+import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
@@ -39,19 +40,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         if (!user || !user.password) return null;
 
-        // In production: use bcrypt.compare
-        // For simplicity here, compare directly (replace with bcrypt in production)
-        const bcrypt = await import("bcryptjs").catch(() => null);
-        let passwordMatch = false;
-        if (bcrypt) {
-          passwordMatch = await bcrypt.compare(
-            parsed.data.password,
-            user.password
-          );
-        } else {
-          // Fallback: plain comparison (DEV ONLY — remove in production)
-          passwordMatch = parsed.data.password === user.password;
-        }
+        const passwordMatch = await bcrypt.compare(
+          parsed.data.password,
+          user.password
+        );
 
         if (!passwordMatch) return null;
 
@@ -86,7 +78,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 export async function requireAdmin() {
   const session = await auth();
   if (!session?.user || (session.user as any).role !== "ADMIN") {
-    throw new Error("Unauthorized");
+    return null;
   }
   return session;
 }

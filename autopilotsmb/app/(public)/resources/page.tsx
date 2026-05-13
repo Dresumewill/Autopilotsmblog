@@ -139,11 +139,11 @@ export default async function ResourcesPage() {
                   <div className="flex items-center gap-1">
                     <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
                     <span className="text-sm text-zinc-400">
-                      {(product.rating || 4.5).toFixed(1)}
+                      {((product as any).rating || 4.5).toFixed(1)}
                     </span>
                   </div>
                   <span className="text-xs text-zinc-500">
-                    {product.downloads?.toLocaleString()} downloads
+                    {(product as any).downloads?.toLocaleString()} downloads
                   </span>
                 </div>
 
@@ -206,10 +206,10 @@ export default async function ResourcesPage() {
                   <div className="flex items-center gap-1">
                     <Star className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" />
                     <span className="text-sm text-zinc-400">
-                      {(product.rating || 4.7).toFixed(1)}
+                      {((product as any).rating || 4.7).toFixed(1)}
                     </span>
                     <span className="text-xs text-zinc-600 ml-1">
-                      ({product.downloads} sold)
+                      ({(product as any).downloads} sold)
                     </span>
                   </div>
                   <div className="text-right">

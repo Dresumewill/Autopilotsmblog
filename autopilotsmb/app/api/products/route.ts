@@ -40,10 +40,18 @@ export async function POST(request: NextRequest) {
   if (!parsed.success) return NextResponse.json({ error: "Validation failed", issues: parsed.error.issues }, { status: 422 });
 
   try {
-    const slug = parsed.data.name
+    let slug = parsed.data.name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-|-$/g, "");
+
+    // Ensure slug uniqueness by appending a counter if needed
+    const existing = await prisma.product.findUnique({ where: { slug } });
+    if (existing) {
+      const count = await prisma.product.count({ where: { slug: { startsWith: slug } } });
+      slug = `${slug}-${count + 1}`;
+    }
+
     const product = await prisma.product.create({ data: { ...parsed.data, slug } });
     return NextResponse.json({ product }, { status: 201 });
   } catch (error) {

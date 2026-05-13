@@ -12,7 +12,7 @@ const PostCreateSchema = z.object({
     .min(1)
     .max(200)
     .regex(/^[a-z0-9-]+$/),
-  excerpt: z.string().max(500).optional(),
+  excerpt: z.string().max(500).default(""),
   content: z.string().min(1),
   coverImage: z.string().url().optional(),
   published: z.boolean().default(false),
@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
       data: {
         ...data,
         publishedAt: data.published ? new Date() : null,
-        authorId: session.user.id,
+        authorId: session.user!.id!,
         ...(categoryId ? { categoryId } : {}),
         ...(tagIds.length > 0
           ? { tags: { connect: tagIds.map((id) => ({ id })) } }
